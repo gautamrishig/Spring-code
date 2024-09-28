@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: API-GATEWAY-SERVICE
+  cloud:
+    gateway:
+      mvc:
+        routes:
+        - id: ORDER-SERVICE
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order/**
+#          filters:
+#            - name: CircuitBreaker
+#              args:
+#                name: orderService
+#                fallbackUri: forward:/orderFallBack
+        - id: MICRO-PAYMENT-SERVICE
+          uri: lb://MICRO-PAYMENT-SERVICE
+          predicates:
+            - Path=/payment/**
+#          filters:
+#            - name: CircuitBreaker
+#              args:
+#                name: microPaymentService
+#                fallbackUri: forward:/paymentFallback
+
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka
+#  instance:
+#    hostname: localhost
+
+server:
+  port: 8989
+  
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      orderService:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 10
+        eventConsumerBufferSize: 10
+      microPaymentService:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 10
+        eventConsumerBufferSize: 10
